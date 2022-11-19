@@ -6,9 +6,11 @@ This file is responsible for displaying the current situation of the game
 """
 
 # Dimensions
-WIDTH = HEIGHT = 512
+HEIGHT = 600
+WIDTH = 512
+HEIGHT512 = 512
 DIMENSION = 8 # 8x8 board
-SQUARE_SIZE = HEIGHT // DIMENSION
+SQUARE_SIZE = HEIGHT512 // DIMENSION
 MAX_FPS = 144
 IMAGES = {}
 
@@ -26,10 +28,25 @@ def main():
     gs = ChessEngine.ChessEngine()
     loadImages()
     running = True
+    squareSelected =  () # keeps track of the last mouse click
+    playerClicks = [] # keeps track of player clicks
     while running:
         for e in p.event.get():
             if e.type == p.QUIT:
-                running = False        
+                running = False
+            elif e.type == p.MOUSEBUTTONDOWN:
+                location = p.mouse.get_pos() #(x, y)
+                column = location[0]//SQUARE_SIZE
+                row = location[1]//SQUARE_SIZE
+                squareSelected = (row, column)
+                if squareSelected == (row, column):
+                    squareSelected = () # deselect
+                    playerClicks = [] # clears the player clicks
+                else:
+                    squareSelected = (row, column)
+                    playerClicks.append(squareSelected)
+                # if len(playerClicks) == 2: # after second click
+
         p.display.flip()
         drawGameState(screen, gs)
         
