@@ -24,25 +24,41 @@ class ChessEngine:
         self.columns = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
         self.rows = ['1', '2', '3', '4', '5', '6', '7', '8']
 
-        self.isWhite = True
+        self.isWhitesTurn = True
 
         self.blackCheck = False
         self.whiteCheck = False
 
         self.moveLog = []
     
-    
+    """
+    Initiates a move, the move is stored in a single parameter in the form (row, column)
+    """
+    def makeMove(self, move):
+        # Sets the moved pieces location into empty piece notation denoted as '--'
+        self.board[move.startRow][move.startColumn] = "--"
+        
+        # Sets the destination as the moved piece. Thus making a move.
+        self.board[move.endRow][move.endColumn] = move.pieceMoved
+        
+        # Negate the value of isWhitesTurn
+        # Description of negation(): Every truth value(boolean) has two values: true or false. Negation is a transformation that transforms
+        # a given truth value as neg(true) = false, neg(false) = true.
+        self.isWhitesTurn = not self.isWhitesTurn
+
 class Move():
 
     """
     Constructor receives the row, column state of the piece and the board which contains it.
     """
+    ranksToRows = {'1': 7, '2': 6, '3' : 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0}
+    rowsToRanks = {7: '1' , 6: '2', 5: '3', 4: '4', 3: '5', 2: '6', 1: '7', 0: '8'}
+    filesToColumns = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
+    columnsToFiles = {0: 'a', 1: 'b', 2: 'c', 3: 'd', 4: 'e', 5: 'f', 6: 'g', 7: 'h'}
+    
     def __init__(self, startSquare, endSquare, board):
         
-        ranksToRows = {'1': 7, '2': 6, '3' : 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0}
-        rowsToRanks = {7: '1' , 6: '2', 5: '3', 4: '4', 3: '5', 2: '6', 1: '7', 0: '8'}
-        filesToColumns = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
-        columnsToFiles = {0: 'a', 1: 'b', 2: 'c', 3: 'd', 4: 'e', 5: 'f', 6: 'g', 7: 'h'}
+        
         
         self.startRow = startSquare[0]
         self.startColumn = startSquare[1]
@@ -51,7 +67,9 @@ class Move():
         self.pieceMoved = board[self.startRow][self.startColumn]
         self.pieceCaptured = board[self.endRow][self.endRow]
     
-    
+    """
+    Returns the starting position, and end position(destination) of the classes move.
+    """
     def getChessNotation(self):
         return self.getRankFile(self.startRow, self.startColumn) + self.getRankFile(self.endRow, self.endColumn)
     
