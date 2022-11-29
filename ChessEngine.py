@@ -24,7 +24,7 @@ class ChessEngine:
         self.columns = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
         self.rows = ['1', '2', '3', '4', '5', '6', '7', '8']
 
-        self.isWhitesTurn = True
+        self.whiteToMove = True
 
         self.blackCheck = False
         self.whiteCheck = False
@@ -40,12 +40,105 @@ class ChessEngine:
         
         # Sets the destination as the moved piece. Thus making a move.
         self.board[move.endRow][move.endColumn] = move.pieceMoved
+        self.moveLog.append(move)
         
-        # Negate the value of isWhitesTurn
+        # Negate the value of whiteToMove
         # Description of negation(): Every truth value(boolean) has two values: true or false. Negation is a transformation that transforms
         # a given truth value as neg(true) = false, neg(false) = true.
-        self.isWhitesTurn = not self.isWhitesTurn
+        self.whiteToMove = not self.whiteToMove
 
+    def undoMove(self):
+        if(len(self.moveLog) == 0): return
+        # The last move is removed and saved in an attribute at the sametime
+        move  = self.moveLog.pop()
+        
+        # The moved piece returns to its previous location.
+        self.board[move.startRow][move.startColumn] = self.board[move.endRow][move.endColumn]
+        
+        piece = move.pieceCaptured
+
+        # 
+        self.board[move.endRow][move.endColumn] = piece    
+        #negate whiteToMove
+        self.whiteToMove = not self.whiteToMove
+        
+        
+    def getValidMoves(self):
+        return self.getAllPossibleMoves()
+    
+    def searchForPossibleMoves(self, pieceX):
+        currentPiece = pieceX[0][1]
+        moves = []
+        if(currentPiece == 'p'):
+            moves += self.getPawnMoves(pieceX)
+        
+        return moves
+        
+
+
+    def getAllPossibleMoves(self):
+        moves = []
+        for r in range(len(self.board)):
+            for c in range(len(self.board[r])):
+                piece = self.board[r][c]
+                if piece[0] == 'w' and self.whiteToMove:
+                    moves += self.searchForPossibleMoves((piece, r, c))            
+                
+                if piece[0] == 'b' and not self.whiteToMove:
+                    moves += self.searchForPossibleMoves((piece, r, c))
+        return moves
+    # piece* = (piece, row, column)
+   #def getPawnMoves(self, r, c, moves) 
+    def getPawnMoves(self, piece):
+        pawn = piece[0]
+        r = piece[1]
+        c = piece[2]
+        moves = []
+        if piece[0][0] == 'b':
+            
+            if self.board[r + 1][c] == "--":
+                moves += [Move((r, c), (r + 1, c), self.board)]
+
+            opponent = self.board[r + 1][c + 1]
+            if self.isEnemy(pawn, opponent):
+                moves += [Move((r, c), (r + 1, c + 1), self.board)]
+                
+            opponent = self.board[r + 1][c - 1]
+            if self.isEnemy(pawn, opponent):
+                moves += [Move((r, c), (r + 1, c - 1), self.board)]
+                
+        if piece[0][0] == "w":
+            if self.board[r - 1][c] == "--":
+                moves += [Move((r, c), (r - 1, c), self.board)]
+            
+            opponent = self.board[r - 1][c - 1]
+            if self.isEnemy(pawn, opponent):
+                moves += [Move((r, c), (r - 1, c - 1), self.board)]
+            
+            opponent = self.board[r - 1][c + 1]
+            if self.isEnemy(pawn, opponent):
+                moves += [Move((r, c), (r - 1, c + 1), self.board)]
+        
+        return moves
+                    
+    def getRookMoves(self, piece):
+        pass
+
+    def getBishopMoves(self, piece): 
+        pass
+    
+    def getQueenMoves(self, piece):
+        pass
+        #return getRookMoves(self, piece) + getBishopMoves(self, piece)
+
+    def getKnightMoves(self, piece):
+        pass
+    
+    def getKingMoves(self, piece):
+        pass
+    
+    def isEnemy(self, piece1, piece2):
+        return piece1[0] != piece2[0]
 class Move():
 
     """
@@ -58,14 +151,21 @@ class Move():
     
     def __init__(self, startSquare, endSquare, board):
         
-        
-        
         self.startRow = startSquare[0]
         self.startColumn = startSquare[1]
         self.endRow = endSquare[0]
         self.endColumn = endSquare[1]
         self.pieceMoved = board[self.startRow][self.startColumn]
-        self.pieceCaptured = board[self.endRow][self.endRow]
+        self.pieceCaptured = board[self.endRow][self.endColumn]
+        self.moveID = self.startRow * 1000 + self.startColumn * 100 + self.endRow * 10 + self.endColumn 
+        print(self.moveID)
+    
+    def __eq__(self, other):
+        if isinstance(other, Move):
+            return self.moveID == other.moveID
+        
+        return False
+        
     
     """
     Returns the starting position, and end position(destination) of the classes move.
@@ -77,8 +177,8 @@ class Move():
     def getRankFile(self, row, column):
         return self.columnsToFiles[column] + self.rowsToRanks[row]
     
-    
-    
+
+     
     
     
     

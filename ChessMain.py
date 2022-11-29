@@ -11,7 +11,7 @@ WIDTH = 512
 HEIGHT512 = 512
 DIMENSION = 8 # 8x8 board
 SQUARE_SIZE = HEIGHT512 // DIMENSION
-MAX_FPS = 144
+MAX_FPS = 15
 IMAGES = {}
 
 def loadImages():
@@ -24,8 +24,11 @@ def loadImages():
 def main():
     p.init()
     screen = p.display.set_mode([WIDTH, HEIGHT], vsync=1)
+    clock = p.time.Clock()
     screen.fill(p.Color("White"))
     gs = ChessEngine.ChessEngine()
+    validMoves = gs.getValidMoves()
+    moveMade = True
     loadImages()
     running = True
     squareSelected =  () # keeps track of the last mouse click
@@ -36,6 +39,7 @@ def main():
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
+            # mouse handler
             elif e.type == p.MOUSEBUTTONDOWN:
                 location = p.mouse.get_pos() #(x, y)
                 column = location[0]//SQUARE_SIZE
@@ -49,40 +53,27 @@ def main():
                 if len(playerClicks) == 2: # after second click
                     # first click signfies the piece that'll be moved, the second click is its destination.
                     move = ChessEngine.Move(playerClicks[0], playerClicks[1], gs.board) 
-                    print(move.getChessNotation()) # printsthe moves
-                    gs.makeMove(move) # making the move
+                    print(move.getChessNotation()) # prints the moved piece.
+                    if move in validMoves:
+                        gs.makeMove(move) # making the move
+                        moveMade = True
                     squareSelected = () # resets user clicks
                     playerClicks = [] 
-                """    
-                elif e.type == p.MOUSEBUTTONDOWN:
-                    location = p.mouse.get_pos() #(x, y)
-                    column = location[0]//SQUARE_SIZE
-                    row = location[1]//SQUARE_SIZE
-                
-            
-                    if squareSelected == (row, column):
-                        squareSelected = () # deselect
-                        playerClicks = [] # clears the player clicks
-                    else:
-                        squareSelected = (row, column)
-                        playerClicks.append(squareSelected)
-                if e.type == p.MOUSEBUTTONUP: # after second click
-                    # first click signfies the piece that'll be moved, the second click is its destination.
-                    location = p.mouse.get_pos()
-                    column = location [0]//SQUARE_SIZE
-                    row = location [1]//SQUARE_SIZE
-                    move = ChessEngine.Move(playerClicks[0], , gs.board) 
-                    print(move.getChessNotation()) # printsthe moves
-                    gs.makeMove(move) # making the move
-                    squareSelected = () # resets user clicks
-                    playerClicks = [] 
-                    
-                """    
+            # key handlers
             elif e.type == p.KEYDOWN:
-                pass
+                if e.key == p.K_z: # undo when "z" is pressed
+                    gs.undoMove()
+                    moveMade = True
                 
+        
+        if moveMade:
+            validMoves = gs.getValidMoves()
+            moveMade = False   
+        
+        clock.tick(MAX_FPS)
         p.display.flip()
         drawGameState(screen, gs)
+        
         
         
 

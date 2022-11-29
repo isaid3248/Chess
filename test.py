@@ -2,6 +2,10 @@ from random import randint
 
 pieces = ["wp", "wR", "wN", "wB", "wQ", "wK", "bp", "bR", "bN", "bB", "bQ", "bK"]
 
-board = []
+string = "123456"
+tuplea = (1, 2, 3)
 
-print(str(1)+'b')
+piece = pieces[1]
+
+print(piece[0])
+print(piece[1])
